@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { generate } from "./ureg";
+import { generate } from "./urug";
 
 function App() {
 
