@@ -6,8 +6,9 @@ function App() {
   const [posX, setPosX] = useState(0);
   const [posY, setPosY] = useState(0);
 
-  const [scount, setSCount] = useState(3);
+  const [scount, setSCount] = useState(2);
   const [maxS, setMaxS] = useState(3);
+  const [gName, setGName] = useState("");
 
   const [isTracking, setTracking] = useState(false);
 
@@ -154,7 +155,16 @@ function App() {
 
   const handleClickGen = (e) => {
     const username = generate(scount)
+    setGName(username)
     uinput.current.value = username
+  }
+
+  const handleClickRandWord = async (e) => {
+    const res = await fetch('https://random-word-api.vercel.app/api?words=1')
+    if(res.ok) {
+      const body = await res.json()
+      uinput.current.value = gName + body[0]
+    }
   }
 
   return (
@@ -170,13 +180,19 @@ function App() {
                 </div>
                 <div className="bg-indigo-950 pb-5 pt-10">
                   <div className="w-full px-10 flex flex-col">
-                      <button onClick={handleClickGen} className="mx-auto px-5 py-3 bg-pink-500 rounded text-2xl font-['Oswald'] mb-5 hover:bg-transparent border-2 cursor-pointer border-transparent transition hover:text-pink-500 hover:border-pink-500">Generate</button>
+                      <div className="flex flex-wrap md:flex-nowrap justify-center mx-auto gap-5 mb-5">
+                        <button onClick={handleClickGen} className="mb-auto px-5 py-3 bg-pink-500 rounded md:text-2xl font-['Oswald'] hover:bg-transparent border-2 cursor-pointer border-transparent transition hover:text-pink-500 hover:border-pink-500">Generate</button>
+                        <div className="flex flex-col">
+                          <button onClick={handleClickRandWord} className="px-5 py-3 bg-cyan-500 rounded md:text-2xl font-['Oswald'] hover:bg-transparent border-2 cursor-pointer border-transparent transition hover:text-cyan-500 hover:border-cyan-500">Add Random Word</button>
+                          <a className="text-xs underline opacity-50 hover:opacity-80 text-center" href="https://random-word-api.vercel.app" target="_blank" rel="noreferrer">By Rando Vercel API</a>
+                        </div>
+                      </div>
                       <h3 className="text-center text-2xl mb-10">Length:</h3>
                       <div id="slider" className="h-2 w-full md:w-2/3 mx-auto bg-white relative rounded-full select-none">
-                        <div ref={sliderBg} className="h-full absolute top-0 left-0 bg-sky-600 rounded-full select-none"></div>
-                        <div onMouseDown={handleMouseDown} onTouchStart={handleMouseDown} ref={sBtn} className="h-[30px] w-[30px] rounded-full bg-sky-600 absolute -top-3 select-none"></div>
+                        <div ref={sliderBg} className="h-full absolute top-0 left-0 bg-cyan-500 rounded-full select-none"></div>
+                        <div onMouseDown={handleMouseDown} onTouchStart={handleMouseDown} ref={sBtn} className="h-[30px] w-[30px] rounded-full bg-cyan-500 absolute -top-3 select-none"></div>
                       </div>
-                      <h3 className="text-center text-2xl text-sky-600 mt-10">{scount} Syllables</h3>
+                      <h3 className="text-center text-2xl text-cyan-500 mt-10">{scount} Syllables</h3>
                   </div>
                 </div>
               </div>
@@ -185,9 +201,9 @@ function App() {
         <div className="mt-20 flex flex-col px-5 pb-10">
           <h3 className="text-center text-3xl font-['Oswald'] mb-5">About</h3>
           <p className="mx-auto text-lg md:w-2/3 lg:w-1/3">
-            If you are looking for a unique username that is elegant, catchy and free from numbers and pre-existing words. This is the site for you.
-            Each username is randomly generated following basic rules of made-up words. In the end you get a possible completely unique name, that is easy to remember, free of numbers and no existing words.
-            This was created out of passion for minimalistic and cool usernames. 
+            If you are looking for a unique username that is elegant and catchy. This is the site for you.
+            Each username is randomly generated following basic rules of made-up words. You get a completely unique name, that is easy to remember and free of numbers.
+            This was created out of passion for minimalistic and cool usernames.
           </p>
         </div>
       </div>
