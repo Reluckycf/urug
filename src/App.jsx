@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from "react"
 import { generate } from "./urug";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
+import { faGithub } from "@fortawesome/free-brands-svg-icons";
 
 function App() {
 
@@ -9,6 +12,7 @@ function App() {
   const [scount, setSCount] = useState(2);
   const [maxS, setMaxS] = useState(3);
   const [gName, setGName] = useState("");
+  const [userName, setUsername] = useState("");
 
   const [isTracking, setTracking] = useState(false);
 
@@ -153,17 +157,24 @@ function App() {
     }
   }
 
+  const handleChange = (e) => {
+    setUsername(e.target.value)
+  }
+
   const handleClickGen = (e) => {
     const username = generate(scount)
     setGName(username)
     uinput.current.value = username
+    setUsername(username)
   }
 
   const handleClickRandWord = async (e) => {
     const res = await fetch('https://random-word-api.vercel.app/api?words=1')
     if(res.ok) {
       const body = await res.json()
+      const username = gName + body[0]
       uinput.current.value = gName + body[0]
+      setUsername(username)
     }
   }
 
@@ -176,17 +187,29 @@ function App() {
               <div className="w-full h-full">
                 <div className="relative">
                   <div className="absolute backdrop-blur-2xl bg-black inset-0"></div>
-                  <input ref={uinput} type="text" className="relative text-center w-full outline-none transition text-white border border-pink-500 py-3 px-5 text-3xl" spellCheck={false} placeholder="Generate a username" />
+                  <input onChange={handleChange} ref={uinput} type="text" className="relative text-center w-full outline-none transition text-white border border-pink-500 py-3 px-5 text-3xl" spellCheck={false} placeholder="Generate a username" />
                 </div>
                 <div className="bg-indigo-950 pb-5 pt-10">
                   <div className="w-full px-10 flex flex-col">
-                      <div className="flex flex-wrap md:flex-nowrap justify-center mx-auto gap-5 mb-5">
-                        <button onClick={handleClickGen} className="mb-auto px-5 py-3 bg-pink-500 rounded md:text-2xl font-['Oswald'] hover:bg-transparent border-2 cursor-pointer border-transparent transition hover:text-pink-500 hover:border-pink-500">Generate</button>
+                      <div className="flex flex-wrap md:flex-nowrap gap-5 mb-5 mx-auto">
+                        <button onClick={handleClickGen} className="mb-auto justify-self-center px-5 py-3 bg-pink-500 rounded md:text-2xl font-['Oswald'] hover:bg-transparent border-2 cursor-pointer border-transparent transition hover:text-pink-500 hover:border-pink-500">Generate</button>
                         <div className="flex flex-col">
                           <button onClick={handleClickRandWord} className="px-5 py-3 bg-cyan-500 rounded md:text-2xl font-['Oswald'] hover:bg-transparent border-2 cursor-pointer border-transparent transition hover:text-cyan-500 hover:border-cyan-500">Add Random Word</button>
                           <a className="text-xs underline opacity-50 hover:opacity-80 text-center" href="https://random-word-api.vercel.app" target="_blank" rel="noreferrer">By Rando Vercel API</a>
                         </div>
                       </div>
+                      {
+                        userName && (
+                          <a href={"https://instantusername.com/?q=" + encodeURI(userName)} target="_blank" rel="noreferrer" title="Check if the username is available on social media" className="mx-auto mb-10 px-5 py-2 disabled:opacity-60 bg-emerald-500 rounded md:text-2xl font-['Oswald'] hover:bg-transparent border-2 cursor-pointer border-transparent transition hover:text-emerald-500 hover:border-emerald-500">
+                            <div className="flex gap-2 items-center">
+                              <p>Check Username</p>
+                              <div className="text-lg">
+                                <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
+                              </div>
+                            </div>
+                          </a>
+                        )
+                      }
                       <h3 className="text-center text-2xl mb-10">Length:</h3>
                       <div id="slider" className="h-2 w-full md:w-2/3 mx-auto bg-white relative rounded-full select-none">
                         <div ref={sliderBg} className="h-full absolute top-0 left-0 bg-cyan-500 rounded-full select-none"></div>
@@ -205,6 +228,14 @@ function App() {
             Each username is randomly generated following basic rules of made-up words. You get a completely unique name, that is easy to remember and free of numbers.
             This was created out of passion for minimalistic and cool usernames.
           </p>
+          <div className="mt-10 flex flex-col">
+            <div className="flex w-full justify-center text-2xl mb-2">
+              <a href="https://github.com/Reluckycf/urug/">
+                <FontAwesomeIcon icon={faGithub}/>
+              </a>
+            </div>
+            <a href="https://github.com/Reluckycf" target="_blank" rel="noreferrer" className="mx-auto text-sm hover:underline">by Reluckycf</a>
+          </div>
         </div>
       </div>
     </>
