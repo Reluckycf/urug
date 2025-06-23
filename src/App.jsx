@@ -24,16 +24,28 @@ function App() {
       }
     }
 
+    const OnTouchMove = (e) => {
+      if (isTracking) {
+        const touch = e.touches[0]
+        setPosX(touch.clientX)
+        setPosY(touch.clientY)
+      }
+    }
+
     const OnMouseUp = () => {
       setTracking(false);
     }
 
     document.addEventListener('mousemove', OnMouseMove)
+    document.addEventListener('touchmove', OnTouchMove)
     document.addEventListener('mouseup', OnMouseUp)
+    document.addEventListener('touchend', OnMouseUp)
 
     return () => {
       document.removeEventListener('mousemove', OnMouseMove)
       document.removeEventListener('mouseup', OnMouseUp)
+      document.removeEventListener('touchmove', OnTouchMove)
+      document.removeEventListener('touchend', OnMouseUp)
     }
   }, [isTracking])
 
@@ -64,7 +76,6 @@ function App() {
         count = 1
       }
       setSCount(count)
-      console.log(count)
 
       const btn = sBtn.current
       const bg = sliderBg.current
@@ -88,8 +99,7 @@ function App() {
   }, [isTracking, posX, posY, maxS])
 
   useEffect(() => {
-    if (!isTracking) {
-
+    const getSliderPos = () => {
       const slider = document.getElementById('slider');
       const pos = slider.getBoundingClientRect()
       const unit = pos.width / maxS
@@ -99,14 +109,22 @@ function App() {
 
       btn.style.left = `${parseInt((unit * (scount - 1)) - 15)}px`
       bg.style.width = `${parseInt((unit * (scount - 1)))}px`
-
     }
-  }, [scount])
+
+    document.addEventListener('resize', getSliderPos)
+
+    if (!isTracking) {
+      getSliderPos()
+    }
+
+    return () => {
+      document.removeEventListener('resize', getSliderPos)
+    }
+  }, [scount, isTracking])
 
 
   const handleMouseDown = (e) => {
     setTracking(true);
-    console.log(e.target)
   }
 
   const handleClickGen = (e) => {
@@ -131,13 +149,21 @@ function App() {
                       <h3 className="text-center text-2xl mb-10">Length:</h3>
                       <div id="slider" className="h-2 w-2/3 mx-auto bg-white relative rounded-full select-none">
                         <div ref={sliderBg} className="h-full absolute top-0 left-0 bg-sky-600 rounded-full select-none"></div>
-                        <div onMouseDown={handleMouseDown} ref={sBtn} className="h-[30px] w-[30px] rounded-full bg-sky-600 absolute -top-3 select-none"></div>
+                        <div onMouseDown={handleMouseDown} onTouchStart={handleMouseDown} ref={sBtn} className="h-[30px] w-[30px] rounded-full bg-sky-600 absolute -top-3 select-none"></div>
                       </div>
                       <h3 className="text-center text-2xl text-sky-600 mt-10">{scount} Syllables</h3>
                   </div>
                 </div>
               </div>
             </div>
+        </div>
+        <div className="mt-20 flex flex-col px-50 pb-10">
+          <h3 className="text-center text-3xl font-['Oswald'] mb-5">About</h3>
+          <p className="mx-auto text-lg">
+            If you are looking for a unique username that is elegant, catchy and free from numbers and pre-existing words. This is the site for you.
+            Each username is randomly generated following basic rules of made-up words. In the end you get a possible completely unique name, that is easy to remember, free of numbers and no existing words.
+            This was created out of passion for minimalistic and cool usernames. 
+          </p>
         </div>
       </div>
     </>

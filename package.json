@@ -1,6 +1,6 @@
 {
   "name": "urug-react",
-  "homepage": "https://reluckycf.github.io/urug",
+  "homepage": "https://reluckycf.github.io/urug/",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist --clean" 
+    "deploy": "gh-pages -d dist -f" 
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.10",
