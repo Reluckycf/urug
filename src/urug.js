@@ -144,53 +144,90 @@ function getRandomItem(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-function getRandomOnset(start) {
-  const on = getRandomItem(start ? [...onsets, startingOnsets] : onsets)
-  return getRandomItem(on)
+function getRandomOnset(start, length = 5) {
+  if(length <= 0) return ''
+  let onsetsC = []
+  if (start) {
+    onsetsC = [...onsets, startingOnsets]
+  } else {
+    onsetsC = [...onsets]
+  }
+  const randlen = Math.floor(Math.random() * 3) + 1
+  onsetsC = onsetsC.map(v => v.filter(c => length >= randlen ? c.length === randlen : c.length === length)).filter(v => v.length > 0)
+
+  const on = getRandomItem(onsetsC)
+  const onset = getRandomItem(on)
+  return onset
 }
 
-function getRandomCoda(finish) {
-  let co = getRandomItem(finish ? [...codas, finisherCodas] : codas)
+function getRandomCoda(length = 5) {
+  if(length <= 0) return ''
+  let codasC = []
+  const randlen = Math.floor(Math.random() * 4) + 1
+  if (length - randlen <= 0) {
+    codasC = [...codas, finisherCodas]
+  } else {
+    codasC = [...codas]
+  }
+
+  codasC = codasC.map(v => v.filter(c => length >= randlen ? c.length === randlen : c.length === length)).filter(v => v.length > 0)
+
+
+  let co = getRandomItem(codasC)
   let coda = getRandomItem(co)
   return coda
 }
 
-function getRandomVowelS(lastStr) {
+function getRandomVowelS(lastStr, length = 5) {
+  if(length <= 0) return ''
   let cvowels = [...vowelSounds]
   
   if (lastStr == '') {
     cvowels = cvowels.filter(v => v !== 'y')
   }
 
+  const randlen = Math.floor(Math.random() * 2) + 1
+
+  cvowels.filter(c => length >= randlen ? c.length === randlen : c.length === length).filter(v => v.length > 0)
+
+
   const v = getRandomItem(cvowels)
   return getRandomItem(v)
 }
 
-export function createSyllable(laststr, stype, lastS) {
+export function createSyllable(laststr, stype, length) {
   let syllable = "";
 
   switch (stype) {
     case 1: { // CV
-      const c = getRandomOnset(!laststr);
-      const v = getRandomVowelS(laststr);
+      const c = getRandomOnset(!laststr, length);
+      length -= c?.length
+      const v = getRandomVowelS(laststr, length);
+      length -= v?.length
       syllable = c + v;
       break;
     }
     case 2: { // CVF
-      const c = getRandomOnset(!laststr);
-      const v = getRandomVowelS(laststr);
-      const f = getRandomCoda(lastS);
+      const c = getRandomOnset(!laststr, length);
+      length -= c?.length
+      const v = getRandomVowelS(laststr, length);
+      length -= v?.length
+      const f = getRandomCoda(length);
+      length -= f?.length
       syllable = c + v + f;
       break;
     }
     case 3: { // VF
-      const v = getRandomVowelS(laststr);
-      const f = getRandomCoda(lastS);
+      const v = getRandomVowelS(laststr, length);
+      length -= v?.length
+      const f = getRandomCoda(length);
+      length -= f?.length
       syllable = v + f;
       break;
     }
     case 4: { // V
-      const v = getRandomVowelS(laststr);
+      const v = getRandomVowelS(laststr, length);
+      length -= v?.length
       syllable = v;
       break;
     }
@@ -202,10 +239,32 @@ export function createSyllable(laststr, stype, lastS) {
 export function generate(length) {
   let name = "";
 
-  for (let i = 0; i < length; i++) {
-    const stype = Math.floor(Math.random() * 4) + 1;
-    const lastS = i+1 === length
-    name += createSyllable(name, stype, lastS);
+  // for (let i = 0; i < length; i++) {
+  //   const stype = Math.floor(Math.random() * 4) + 1;
+  //   const lastS = i+1 === length
+  //   name += createSyllable(name, stype, lastS);
+  // }
+
+  while (length > 0) {
+    let types = [
+      {type: 1, value: 2},
+      {type: 2, value: 3},
+      {type: 3, value: 2},
+      {type: 4, value: 1}
+    ]
+
+    if (length < 3) {
+      types = types.filter( v => v.value <= length)
+    }
+
+    const rType = getRandomItem(types);
+    
+    const syll = createSyllable(name, rType.type, length)
+    length -= syll.length
+    
+    name += syll
+
+    // console.log(rType)
   }
 
   return name;

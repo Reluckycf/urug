@@ -9,29 +9,37 @@ function App() {
   const [posX, setPosX] = useState(0);
   const [posY, setPosY] = useState(0);
 
-  const [scount, setSCount] = useState(2);
-  const [maxS, setMaxS] = useState(3);
+  const [scount, setSCount] = useState(6);
+  const [wcount, setWCount] = useState(4)
   const [gName, setGName] = useState("");
   const [userName, setUsername] = useState("");
 
   const [isTracking, setTracking] = useState(false);
+  const [isTracking2, setTracking2] = useState(false);
 
+  const maxS = useRef(40-4)
+  const maxW = useRef(9-3)
   const countRef = useRef(scount)
+  const countRef2 = useRef(wcount)
   const uinput = useRef(null)
   const sliderBg = useRef(null)
   const sBtn = useRef(null)
+  const sliderBg2 = useRef(null)
+  const sBtn2 = useRef(null)
+  const lengthInput1 = useRef(null)
+  const lengthInput2 = useRef(null)
 
   useEffect(() => {
 
     const OnMouseMove = (e) => {
-      if (isTracking){
+      if (isTracking || isTracking2){
         setPosX(e.clientX)
         setPosY(e.clientY)
       }
     }
 
     const OnTouchMove = (e) => {
-      if (isTracking) {
+      if (isTracking || isTracking2) {
         const touch = e.touches[0]
         setPosX(touch.clientX)
         setPosY(touch.clientY)
@@ -40,7 +48,9 @@ function App() {
 
     const OnMouseUp = () => {
       setTracking(false);
+      setTracking2(false);
       countRef.current = scount
+      countRef2.current = wcount
     }
 
     document.addEventListener('mousemove', OnMouseMove)
@@ -54,19 +64,17 @@ function App() {
       document.removeEventListener('touchmove', OnTouchMove)
       document.removeEventListener('touchend', OnMouseUp)
     }
-  }, [isTracking, scount])
+  }, [isTracking, isTracking2, scount, wcount])
 
 
   useEffect(() => {
     const MoveSlider = () => {
       const slider = document.getElementById('slider');
       const pos = slider.getBoundingClientRect()
-      const unit = pos.width / maxS
-      const sets = {
-        1: (unit*0),
-        2: (unit*1),
-        3: (unit*2),
-        4: (unit*3)
+      const unit = pos.width / maxS.current
+      let sets = []
+      for (let i = 0; i < maxS.current + 1; i++) {
+        sets.push(unit*i)
       }
 
       const btn = sBtn.current
@@ -84,38 +92,104 @@ function App() {
       bg.style.width = `${parseInt(btnPos)}px`
 
       let count = 1
-      const offset = 30
+      const offset = (sets[0] + sets[1]) / 2
       const countS = countRef.current
+      const min = 4
 
-      if (countS < 4 && (btnPos > sets[countS] + offset && (btnPos > sets[3] + offset && btnPos <= sets[4])) || btnPos >= sets[4] - offset){
-        count = 4
-      } else if(countS < 3  && (btnPos > sets[countS] + offset && (btnPos > sets[2] + offset && btnPos <= sets[3] + offset)) || (countS > 3 && (btnPos < sets[countS] + offset && (btnPos >= sets[3] + offset && btnPos < sets[4] - offset))) || (btnPos >= sets[3] - offset && btnPos <= sets[3] + offset)) {
-        count = 3
-      } else if(countS < 2 && (btnPos > sets[countS] + offset && (btnPos > sets[1] + offset && btnPos <= sets[2] + offset)) || (countS > 2 && (btnPos < sets[countS] + offset && (btnPos >= sets[2] + offset && btnPos < sets[3] - offset))) || (btnPos >= sets[2] - offset && btnPos <= sets[2] + offset)) {
-        count = 2
-      } else if (btnPos <= sets[1] + offset){
-        count = 1
+      if (countS < (sets.length) && (btnPos > sets[countS-1] + offset && (btnPos > sets[sets.length-2] + offset && btnPos <= sets[sets.length-1])) || btnPos >= sets[sets.length-1] - offset){
+        count = sets.length-1 + min
+      } 
+
+      for(let i = 0; i < sets.length; i++) {
+        if (countS < i+1 && (btnPos > sets[countS-1] + offset && (btnPos > sets[i-1] + offset && btnPos <= sets[i] + offset)) || (countS > i+1 && (btnPos < sets[countS-1] + offset && (btnPos >= sets[i] + offset && btnPos < sets[i+1] - offset))) || (btnPos >= sets[i] - offset && btnPos <= sets[i] + offset)) {
+          count = i + min
+        }
       }
 
+      // if (btnPos <= sets[0] + offset){
+      //   count = min
+      // }
+
       setSCount(count)
+    }
+
+    const MoveSlider2 = () => {
+      const slider = document.getElementById('slider2');
+      const pos = slider.getBoundingClientRect()
+      const unit = pos.width / maxW.current
+      let sets = []
+      for (let i = 0; i < maxW.current + 1; i++) {
+        sets.push(unit*i)
+      }
+
+      const btn = sBtn2.current
+      const bg = sliderBg2.current
+      const mousePos = (posX - pos.x)
+      let btnPos = 0
+      if (mousePos < 0) {
+        btnPos = 0
+      } else if (mousePos > pos.width){
+        btnPos = pos.width
+      } else {
+        btnPos = mousePos
+      }
+      btn.style.left = `${parseInt(btnPos - 15)}px`
+      bg.style.width = `${parseInt(btnPos)}px`
+
+      let count = 1
+      const offset = (sets[0] + sets[1]) / 2
+      const countS = countRef2.current
+      const min = 3
+
+      if (countS < (sets.length) && (btnPos > sets[countS-1] + offset && (btnPos > sets[sets.length-2] + offset && btnPos <= sets[sets.length-1])) || btnPos >= sets[sets.length-1] - offset){
+        count = sets.length-1 + min
+      } 
+
+      for(let i = 0; i < sets.length; i++) {
+        if (countS < i+1 && (btnPos > sets[countS-1] + offset && (btnPos > sets[i-1] + offset && btnPos <= sets[i] + offset)) || (countS > i+1 && (btnPos < sets[countS-1] + offset && (btnPos >= sets[i] + offset && btnPos < sets[i+1] - offset))) || (btnPos >= sets[i] - offset && btnPos <= sets[i] + offset)) {
+          count = i + min
+        }
+      }
+
+      // if (btnPos <= sets[0] + offset){
+      //   count = min
+      // }
+
+      setWCount(count)
     }
 
     if(isTracking) {
       MoveSlider()
     }
-  }, [isTracking, posX, posY, maxS])
+    if(isTracking2) {
+      MoveSlider2()
+    }
+  }, [isTracking, isTracking2, posX, posY, maxS])
 
   const getSliderPos = () => {
     const slider = document.getElementById('slider');
     const pos = slider.getBoundingClientRect()
-    const unit = pos.width / maxS
+    const unit = pos.width / maxS.current
 
     const btn = sBtn.current
     const bg = sliderBg.current
     const countS = countRef.current
 
-    btn.style.left = `${parseInt((unit * (countS - 1)) - 15)}px`
-    bg.style.width = `${parseInt((unit * (countS - 1)))}px`
+    btn.style.left = `${parseInt((unit * (countS - 4)) - 15)}px`
+    bg.style.width = `${parseInt((unit * (countS - 4)))}px`
+  }
+
+  const getSliderPos2 = () => {
+    const slider = document.getElementById('slider2');
+    const pos = slider.getBoundingClientRect()
+    const unit = pos.width / maxW.current
+
+    const btn = sBtn2.current
+    const bg = sliderBg2.current
+    const countS = countRef2.current
+
+    btn.style.left = `${parseInt((unit * (countS - 3)) - 15)}px`
+    bg.style.width = `${parseInt((unit * (countS - 3)))}px`
   }
 
   useEffect(() => {
@@ -126,11 +200,16 @@ function App() {
       }
     }
 
-    window.addEventListener('resize', getSliderPos)
+    const setPos = () => {
+      getSliderPos()
+      getSliderPos2()
+    }
+
+    window.addEventListener('resize', setPos)
     document.addEventListener('keypress', handleKey)
     
     return () => {
-      window.removeEventListener('resize', getSliderPos)
+      window.removeEventListener('resize', setPos)
       document.removeEventListener('keypress', handleKey)
     }
 
@@ -141,7 +220,16 @@ function App() {
     if (!isTracking) {
       getSliderPos()
     }
-  }, [scount, isTracking])
+
+    if(!isTracking2) {
+      getSliderPos2()
+    }
+
+    lengthInput1.current.value = scount
+    lengthInput2.current.value = wcount
+
+
+  }, [scount, wcount, isTracking, isTracking2])
 
 
   const handleMouseDown = (e) => {
@@ -157,6 +245,37 @@ function App() {
     }
   }
 
+  const handleMouseDown2 = (e) => {
+    setTracking2(true);
+    if (e.touches) {
+      const touch = e.touches[0]
+      setPosX(touch.clientX)
+      setPosY(touch.clientY)
+
+    } else {
+      setPosX(e.clientX)
+      setPosY(e.clientY)
+    }
+  }
+
+  const handleChangeLength = (e) => {
+    const value = parseInt(e.target.value)
+    if (value >= 4 && value <= 40) {
+      setSCount(value)
+      countRef.current = value
+      getSliderPos()
+    }
+  }
+
+  const handleChangeLengthWord = (e) => {
+    const value = parseInt(e.target.value)
+    if (value >= 4 && value <= 40) {
+      setWCount(value)
+      countRef2.current = value
+      getSliderPos2()
+    }
+  }
+
   const handleChange = (e) => {
     setUsername(e.target.value)
   }
@@ -169,7 +288,7 @@ function App() {
   }
 
   const handleClickRandWord = async (e) => {
-    const res = await fetch('https://random-word-api.vercel.app/api?words=1')
+    const res = await fetch('https://random-word-api.vercel.app/api?words=1&length=' + wcount)
     if(res.ok) {
       const body = await res.json()
       const username = gName + body[0]
@@ -189,7 +308,7 @@ function App() {
                   <div className="absolute backdrop-blur-2xl bg-black inset-0"></div>
                   <input onChange={handleChange} ref={uinput} type="text" className="relative text-center w-full outline-none transition text-white border border-pink-500 py-3 px-5 text-3xl" spellCheck={false} placeholder="Generate a username" />
                 </div>
-                <div className="bg-indigo-950 pb-5 pt-10">
+                <div className="bg-indigo-950 pb-20 pt-10">
                   <div className="w-full px-10 flex flex-col">
                       <div className="flex flex-wrap md:flex-nowrap gap-5 mb-5 mx-auto">
                         <button onClick={handleClickGen} className="mb-auto justify-self-center px-5 py-3 bg-pink-500 rounded md:text-2xl font-['Oswald'] hover:bg-transparent border-2 cursor-pointer border-transparent transition hover:text-pink-500 hover:border-pink-500">Generate</button>
@@ -210,12 +329,29 @@ function App() {
                           </a>
                         )
                       }
-                      <h3 className="text-center text-2xl mb-10">Length:</h3>
-                      <div id="slider" className="h-2 w-full md:w-2/3 mx-auto bg-white relative rounded-full select-none">
-                        <div ref={sliderBg} className="h-full absolute top-0 left-0 bg-cyan-500 rounded-full select-none"></div>
-                        <div onMouseDown={handleMouseDown} onTouchStart={handleMouseDown} ref={sBtn} className="h-[30px] w-[30px] rounded-full bg-cyan-500 absolute -top-3 select-none"></div>
+                      <div className="Sliders flex flex-col gap-10">
+                        <div className="nameSlider flex flex-col">
+                          <div className="flex text-2xl mb-10 mx-auto gap-2">
+                            <h3 className="">Name Length:</h3>
+                            <input ref={lengthInput1} onChange={handleChangeLength} className="w-10 outline-none" type="number" min={4} max={40} defaultValue={scount} />
+                          </div>
+                          <div id="slider" className="h-2 w-full md:w-2/3 mx-auto bg-white relative rounded-full select-none">
+                            <div ref={sliderBg} className="h-full absolute top-0 left-0 bg-pink-500 rounded-full select-none"></div>
+                            <div onMouseDown={handleMouseDown} onTouchStart={handleMouseDown} ref={sBtn} className="h-[30px] w-[30px] rounded-full bg-pink-500 absolute -top-3 select-none"></div>
+                          </div>
+                        </div>
+                        <div className="wordSlider flex flex-col">
+                          <div className="flex text-2xl mb-10 mx-auto gap-2">
+                            <h3 className="">Random Word Length:</h3>
+                            <input ref={lengthInput2} onChange={handleChangeLengthWord} className="w-10 outline-none" type="number" min={4} max={40} defaultValue={wcount} />
+                          </div>
+                          <div id="slider2" className="h-2 w-full md:w-2/3 mx-auto bg-white relative rounded-full select-none">
+                            <div ref={sliderBg2} className="h-full absolute top-0 left-0 bg-cyan-500 rounded-full select-none"></div>
+                            <div onMouseDown={handleMouseDown2} onTouchStart={handleMouseDown2} ref={sBtn2} className="h-[30px] w-[30px] rounded-full bg-cyan-500 absolute -top-3 select-none"></div>
+                          </div>
+                        </div>
+
                       </div>
-                      <h3 className="text-center text-2xl text-cyan-500 mt-10">{scount} Syllables</h3>
                   </div>
                 </div>
               </div>
