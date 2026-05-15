@@ -1,0 +1,1 @@
+### [words.txt](words.txt) provided by [dwyl/english-words](https://github.com/dwyl/english-words).
